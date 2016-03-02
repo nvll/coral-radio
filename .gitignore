@@ -1,0 +1,7 @@
+*.swp
+*~
+tags
+TAGS
+*.orig
+cscope.*
+*.dSYM
