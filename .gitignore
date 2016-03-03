@@ -5,3 +5,4 @@ TAGS
 *.orig
 cscope.*
 *.dSYM
+third_party
