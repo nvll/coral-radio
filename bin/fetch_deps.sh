@@ -1,8 +1,10 @@
-#!/bin/sh
+#!/bin/bash
 
 OS=`uname`
 if [ "$OS" = "Darwin" ]; then
     OS=mac
+else
+    OS=linux
 fi
 
 function extract () {
@@ -28,7 +30,7 @@ function check_fetch_extract () {
     mkdir -p $OUT_DIR
     if [ ! -f third_party/archives/.$FILE.downloaded ]; then
         echo "Fetching $URL"
-        curl -s -L -o third_party/archives/$FILE $URL && touch third_party/archives/.$FILE.downloaded
+        curl -L -o third_party/archives/$FILE $URL && touch third_party/archives/.$FILE.downloaded
 
         # If we downloaded a new file for this archive then clear the old directory out
         if [ "$?" = "0" ]; then

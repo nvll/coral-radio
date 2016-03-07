@@ -1,0 +1,22 @@
+#!/usr/bin/env python
+
+import argparse
+import subprocess
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--reset", action='store_true', help="reset the device")
+parser.add_argument("--program", action='store', help="flash PROGRAM to device")
+args = parser.parse_args()
+
+base_command = "openocd -f interface/stlink-v2.cfg -c 'transport select hla_swd' -c 'set WORKAREASIZE 0' -f target/nrf51.cfg "
+command = ''
+
+# We always want to reset anyway
+if args.program:
+    command = base_command + "-c 'program " + args.program + " reset exit'"
+elif args.reset:
+    command = base_command + "-c 'init' -c 'reset' -c 'exit'"
+
+if command:
+    print "Executing\033[1m", command, "\033[0m"
+    subprocess.call(command, shell=True)
