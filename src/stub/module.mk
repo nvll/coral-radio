@@ -1,6 +1,4 @@
 PWD := $(GET_PARENT)
 
-MODULE_SOURCES +=
+MODULE_SOURCES += \
 	$(PWD)/main.c
-
-include make/make-module.mk
