@@ -1,0 +1,35 @@
+#!/usr/bin/env python
+
+import argparse
+import subprocess
+import sys
+
+softdevices = ['s120', 's130', 's210', 's310']
+flashmethods = ['stlink', 'jlink']
+sd_path = "third_party/nrf51_sdk/components/softdevice/%s/hex/%s*softdevice.hex"
+
+if len(sys.argv) < 3:
+    print "Usage: %s <softdevice> <flash method>" % (sys.argv[0])
+    print "\tsoftdevice is one s120, s130, s210, or s310."
+    print "\tflash method is jlink or stlink"
+    exit(1)
+
+sd = sys.argv[1]
+fm = sys.argv[2]
+
+if sd not in softdevices:
+    print "Invalid soft device: %s" % sd
+    exit(1)
+
+if fm not in flashmethods:
+    print "Invalid flash method: %s" % fm
+    exit(1)
+
+if fm == 'jlink':
+    command = "bin/nrfjprog --reset --program "
+else:
+    command = "bin/nrfstprog --reset --program "
+
+command += sd_path % (sd, sd)
+
+subprocess.call(command, shell=True)
