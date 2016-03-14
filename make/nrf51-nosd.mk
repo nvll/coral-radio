@@ -40,7 +40,7 @@ SOURCES  += \
 LDFLAGS  := -mthumb -mabi=aapcs -mcpu=cortex-m0
 LDFLAGS  += -Wl,--gc-sections --specs=nano.specs -lc -lnosys
 LDPATH   := third_party/nrf51_sdk/components/toolchain/gcc
-LDSCRIPT := third_party/nrf51_sdk/components/softdevice/s130/toolchain/armgcc/armgcc_s130_nrf51822_xxaa.ld
+LDSCRIPT := third_party/nrf51_sdk/components/toolchain/gcc/nrf51_xxac.ld
 
 include make/module.mk
 include make/compile.mk

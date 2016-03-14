@@ -6,4 +6,4 @@ MODULES := \
 	lib/nrf_drv/delay \
 	src/blink \
 
-include make/nrf51-sdk.mk
+include make/nrf51-nosd.mk

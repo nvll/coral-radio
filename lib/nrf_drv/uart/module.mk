@@ -1,6 +1,7 @@
 MODULE_SOURCES += \
 	third_party/nrf51_sdk/components/drivers_nrf/uart/nrf_drv_uart.c \
 	third_party/nrf51_sdk/components/libraries/uart/app_uart.c \
+	src/nrf_common/retarget.c \
 
 MODULE_INCLUDES += \
 	third_party/nrf51_sdk/components/drivers_nrf/uart/ \
