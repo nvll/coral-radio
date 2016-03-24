@@ -16,7 +16,7 @@ ALLMODULES += $(MODULES)
 ALLMODULES := $(sort $(ALLMODULES))
 INCMODULES := $(MODULES)
 MODULES :=
-$(foreach INC, $(INCMODULES), $(info including $(INC)))
+$(foreach INC, $(INCMODULES), $(info including '$(INC)'))
 include $(addsuffix /module.mk,$(INCMODULES))
 
 
