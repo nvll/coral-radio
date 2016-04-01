@@ -1,9 +1,9 @@
 #pragma once
 
-// These LED definitions mostly matter for the BSP led bits, which we 
+// These LED definitions mostly matter for the BSP led bits, which we
 // will likely not use long term
 #define LEDS_NUMBER    0
-#define LED_START      0 
+#define LED_START      0
 #define LED_STOP       0
 
 #define LEDS_LIST { }
@@ -25,9 +25,11 @@
 // UART connection with J-Link
 #define RX_PIN_NUMBER  15
 #define TX_PIN_NUMBER  14
-#define CTS_PIN_NUMBER 10
-#define RTS_PIN_NUMBER 8
-#define HWFC           true
+#define CTS_PIN_NUMBER 0
+#define RTS_PIN_NUMBER 0
+#define UART_HWFC      false
+#define UART_TX_BUF    512
+#define UART_RX_BUF    64
 
 // Low frequency clock source to be used by the SoftDevice
 #define NRF_CLOCK_LFCLKSRC      NRF_CLOCK_LFCLKSRC_XTAL_20_PPM

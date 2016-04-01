@@ -12,7 +12,7 @@ HOST_OS := $(subst $(SPACE),-,$(shell uname -sm))
 
 # Config vars
 BUILDDIR 	:= build
-ECHO 		:= @
+ECHO 		?= @
 ALL			:=
 
 # vim: set noexpandtab ts=4 sw=4 sts=4

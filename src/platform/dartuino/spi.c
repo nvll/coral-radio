@@ -1,10 +1,7 @@
 #include <app_util_platform.h>
 #include "nrf_drv_spi.h"
 #include <stdio.h>
-
-#if defined(BOARD_DARTUINOP0)
-#include "dartuino-p0.h"
-#endif
+#include "custom_board.h"
 
 // For dartuino we're only using the primary spi bus
 const nrf_drv_spi_t spi_master_0 = NRF_DRV_SPI_INSTANCE(0);
