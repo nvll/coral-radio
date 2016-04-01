@@ -26,9 +26,9 @@ if fm not in flashmethods:
     exit(1)
 
 if fm == 'jlink':
-    command = "bin/nrfjprog --reset --program "
+    command = "bin/nrfjprog "
 else:
-    command = "bin/nrfstprog --reset --program "
+    command = "bin/nrfstprog "
 
 command += sd_path % (sd, sd)
 

@@ -4,8 +4,6 @@
 INCLUDES += $(MODULE_INCLUDES)
 SOURCES += $(MODULE_SOURCES)
 INCLUDES := $(addprefix -I, $(INCLUDES))
-LDSCRIPT := $(addprefix -T, $(LDSCRIPT))
-LDPATH   := $(addprefix -L, $(LDPATH))
 DEFINES  := $(addprefix -D, $(DEFINES))
 
 ASM_SOURCES  := $(filter %.s,$(SOURCES))
@@ -36,8 +34,9 @@ $(OUTPUT): LDFLAGS := $(LDFLAGS)
 $(OUTPUT): LDPATH := $(LDPATH)
 $(OUTPUT): LDSCRIPT := $(LDSCRIPT)
 $(OUTPUT): $(C_OBJECTS) $(CXX_OBJECTS) $(ASM_OBJECTS)
-	$(ECHO) echo "[$(LD_NAME)] linking $@"
-	$(ECHO) $(LD) $(LDFLAGS) $(LDPATH) $(LDSCRIPT) $^ -o $@
+	$(ECHO) $(SIZE) -t --common $(sort $^)
+	$(ECHO) echo "[$(LD_NAME)] linking $@ with $(LDSCRIPT)"
+	$(ECHO) $(LD) $(LDFLAGS) -L $(LDPATH) -T $(LDSCRIPT) $^ -o $@
 
 $(OUTPUT_DIR)/%.o: PROJECT_DEFINES := $(PROJECT_DEFINES)
 $(OUTPUT_DIR)/%.o: DEFINES := $(DEFINES)
