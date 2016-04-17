@@ -1,9 +1,17 @@
 #include "app_uart.h"
 #include "uart.h"
 #include <stddef.h>
-#include "custom_board.h"
+#include "boards.h"
 
 /* This file contains the minimum setup to get the UART running on an nRF51. */
+
+#ifndef UART_TX_BUF
+#define UART_TX_BUF 512
+#endif
+
+#ifndef UART_RX_BUF
+#define UART_RX_BUF 512
+#endif
 
 void uart_error_handle(app_uart_evt_t * p_event)
 {

@@ -31,6 +31,7 @@ INCLUDES += \
 			third_party/nrf51_sdk/components/toolchain \
 			third_party/nrf51_sdk/components/toolchain/gcc \
 			third_party/nrf51_sdk/components/libraries/util \
+			third_party/nrf51_sdk/components/libraries/timer \
 			third_party/nrf51_sdk/components/libraries/trace \
 			third_party/nrf51_sdk/components/drivers_nrf/common \
 			third_party/nrf51_sdk/components/softdevice/common/softdevice_handler/ \
@@ -42,7 +43,10 @@ SOURCES  += \
 			third_party/nrf51_sdk/components/toolchain/gcc/gcc_startup_nrf51.s \
 			third_party/nrf51_sdk/components/drivers_nrf/common/nrf_drv_common.c \
 			third_party/nrf51_sdk/components/libraries/trace/app_trace.c \
+			third_party/nrf51_sdk/components/libraries/timer/app_timer.c \
 
+MODULES += \
+			lib/s130
 
 
 LDFLAGS  := -mthumb -mabi=aapcs -mcpu=cortex-m0
