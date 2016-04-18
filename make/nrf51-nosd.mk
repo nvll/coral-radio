@@ -18,29 +18,25 @@ CFLAGS	 := -std=gnu99 -Wall -O3
 CFLAGS 	 += -mcpu=cortex-m0 -mthumb -mfloat-abi=soft -mabi=aapcs
 CFLAGS	 += -fdata-sections -ffunction-sections -fno-strict-aliasing
 CFLAGS 	 += -fno-builtin --short-enums
-CFLAGS   += -Wno-unused-parameter -Wunreachable-code
+CFLAGS   += -Wno-unused-parameter -Wunreachable-code -Wall
 ASFLAGS  += -x assembler-with-cpp
-DEFINES  += NRF51 \
-			BSP_DEFINES_ONLY
+DEFINES  += NRF51 BSP_DEFINES_ONLY
+
 INCLUDES += \
 			third_party/nrf51_sdk/components/device \
-			third_party/nrf51_sdk/components/softdevice/s110/headers \
+			third_party/nrf51_sdk/components/softdevice/s130/headers \
 			third_party/nrf51_sdk/components/toolchain \
 			third_party/nrf51_sdk/components/toolchain/gcc \
-			third_party/nrf51_sdk/components/libraries/util \
-			third_party/nrf51_sdk/components/drivers_nrf/common \
-			third_party/nrf51_sdk/examples/bsp \
-			src/nrf_common \
 
 SOURCES  += \
 			third_party/nrf51_sdk/components/toolchain/system_nrf51.c \
 			third_party/nrf51_sdk/components/toolchain/gcc/gcc_startup_nrf51.s \
-			third_party/nrf51_sdk/components/drivers_nrf/common/nrf_drv_common.c
 
 LDFLAGS  := -mthumb -mabi=aapcs -mcpu=cortex-m0
 LDFLAGS  += -Wl,--gc-sections --specs=nano.specs -lc -lnosys
 LDPATH   := third_party/nrf51_sdk/components/toolchain/gcc
-LDSCRIPT := third_party/nrf51_sdk/components/toolchain/gcc/nrf51_xxac.ld
+# Despite us having a nRF51822 chip the SDK only has XXAC for 51422. The memory layout is the same.
+LDSCRIPT := third_party/nrf51_sdk/components/softdevice/s130/toolchain/armgcc/armgcc_s130_nrf51422_xxac.ld
 
 include make/module.mk
 include make/compile.mk
