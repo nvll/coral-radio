@@ -21,5 +21,6 @@ MODULE_INCLUDES += \
 	third_party/nrf51_sdk/components/libraries/timer \
 	third_party/nrf51_sdk/components/libraries/trace \
 	third_party/nrf51_sdk/components/softdevice/common/softdevice_handler/ \
+	third_party/nrf51_sdk/components/softdevice/s130/headers \
 	third_party/nrf51_sdk/examples/bsp \
 	src/nrf_common \
