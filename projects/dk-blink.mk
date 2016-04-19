@@ -3,7 +3,6 @@ DEFINES := BOARD_PCA10028
 
 
 MODULES := \
-	lib/nrf_drv/delay \
-	src/blink \
+	src/blink
 
-include make/nrf51-nosd.mk
+include make/nrf51822-s130.mk

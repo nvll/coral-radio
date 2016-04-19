@@ -24,9 +24,9 @@ DEFINES  += NRF51 BSP_DEFINES_ONLY
 
 INCLUDES += \
 			third_party/nrf51_sdk/components/device \
-			third_party/nrf51_sdk/components/softdevice/s130/headers \
 			third_party/nrf51_sdk/components/toolchain \
 			third_party/nrf51_sdk/components/toolchain/gcc \
+			third_party/nrf51_sdk/components/libraries/util
 
 SOURCES  += \
 			third_party/nrf51_sdk/components/toolchain/system_nrf51.c \
