@@ -48,6 +48,7 @@ $(OUTPUT_DIR)/%.o: %.c
 	@$(MKDIR)
 	$(ECHO) echo "[$(CC_NAME)] compiling $<"
 	$(ECHO) $(CC) $(PROJECT_DEFINES) $(DEFINES) $(CFLAGS) $(INCLUDES) -MD $< -c -o $@
+	$(ECHO) $(CC) -E $(PROJECT_DEFINES) $(DEFINES) $(CFLAGS) $(INCLUDES) -MD $< -c -o $@.c
 	$(ECHO) $(SIZE) $@ >> $@.size
 
 
