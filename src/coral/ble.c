@@ -128,6 +128,9 @@ uint32_t ble_stack_setup(void)
     ASSIGN_NRF_BLE_STR(dis_init.hw_rev_str, dis_hwrev);
     ASSIGN_NRF_BLE_STR(dis_init.fw_rev_str, dis_fwrev);
     ASSIGN_NRF_BLE_STR(dis_init.sw_rev_str, dis_swrev);
+    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&dis_init.dis_attr_md.read_perm);
+    BLE_GAP_CONN_SEC_MODE_SET_NO_ACCESS(&dis_init.dis_attr_md.write_perm);
+
     err = ble_dis_init(&dis_init);
     CHECK_BLE_ERROR(err, "Failed to init DIS\n");
     ble_start_advertising();
