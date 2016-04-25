@@ -5,15 +5,38 @@
 #include "ble_dis.h"
 #include "ble_gap.h"
 #include "ble_advdata.h"
+#include "ble_types.h"
 #include "softdevice_handler.h"
 
-#define CHECK_BLE_ERROR(r, s) \
+#define COUNT_OF(x) ((sizeof(x)/sizeof(0[x])) / ((size_t)(!(sizeof(x) % sizeof(0[x])))))
+#define CHECK_NRF_ERROR(r, s) \
     do { \
         if (r != NRF_SUCCESS) { \
-            printf("BLE ERR %lu: %s\n", r, s); \
+            printf("Err: %s %s (%lu)\n", s, (r < COUNT_OF(nrf_err_tbl)) ? nrf_err_tbl[r] : "", r); \
             goto err; \
         } \
     } while (0); \
+
+char *nrf_err_tbl[] = {
+    "NRF_SUCCESS",
+    "NRF_ERROR_SVC_HANDLER_MISSING",
+    "NRF_ERROR_SOFTDEVICE_NOT_ENABLED",
+    "NRF_ERROR_INTERNAL",
+    "NRF_ERROR_NO_MEMORY",
+    "NRF_ERROR_NOT_FOUND",
+    "NRF_ERROR_NOT_SUPPORTED",
+    "NRF_ERROR_INVALID_PARAM",
+    "NRF_ERROR_INVALID_STATE",
+    "NRF_ERROR_INVALID LENGTH",
+    "NRF_ERROR_INVALID_FLAGS",
+    "NRF_ERROR_INVALID_DATA",
+    "NRF_ERROR_DATA_SIZE",
+    "NRF_ERROR_TIMEOUT",
+    "NRF_ERROR_NULL",
+    "NRF_ERROR_FORBIDDEN",
+    "NRF_ERROR_INVALID_ADDR",
+    "NRF_ERROR_BUSY"
+};
 
 void ble_event_handler(ble_evt_t *event)
 {
@@ -48,14 +71,14 @@ uint32_t ble_gap_setup(void)
     /* Set up a randomly generated GAP address */
     gap_addr.addr_type = BLE_GAP_ADDR_TYPE_RANDOM_PRIVATE_RESOLVABLE;
     err = sd_ble_gap_address_set(BLE_GAP_ADDR_CYCLE_MODE_AUTO, &gap_addr);
-    CHECK_BLE_ERROR(err, "Failed to setup GAP configuration");
+    CHECK_NRF_ERROR(err, "Failed to setup GAP configuration");
 
     BLE_GAP_CONN_SEC_MODE_SET_OPEN(&sec_mode);
     err = sd_ble_gap_device_name_set(&sec_mode, (const uint8_t *)BLE_DEVICE_NAME, strlen(BLE_DEVICE_NAME));
-    CHECK_BLE_ERROR(err, "Failed to set BLE security settings and/or device name");
+    CHECK_NRF_ERROR(err, "Failed to set BLE security settings and/or device name");
 
     err = sd_ble_gap_address_get(&gap_addr);
-    CHECK_BLE_ERROR(err, "Failed to read GAP address");
+    CHECK_NRF_ERROR(err, "Failed to read GAP address");
 
     printf("GAP initialized as '%.*s' with address %02x:%02x:%02x:%02x:%02x:%02x\n",
             strlen(BLE_DEVICE_NAME), BLE_DEVICE_NAME, gap_addr.addr[5], gap_addr.addr[4],
@@ -80,7 +103,7 @@ uint32_t ble_start_advertising(void)
     advertising_data.p_manuf_specific_data = &manuf_data;
 
     err = ble_advdata_set(&advertising_data, NULL);
-    CHECK_BLE_ERROR(err, "Failed to set advertising data");
+    CHECK_NRF_ERROR(err, "Failed to set advertising data");
 
     advertising_params.type         = BLE_GAP_ADV_TYPE_ADV_IND; // Indirect advertising, connectable
     advertising_params.fp           = BLE_GAP_ADV_FP_ANY; // Allow any connections
@@ -89,7 +112,7 @@ uint32_t ble_start_advertising(void)
     advertising_params.p_peer_addr  = NULL; // Only used for Directed IND advertising
 
     err = sd_ble_gap_adv_start(&advertising_params);
-    CHECK_BLE_ERROR(err, "Failed to start advertising\n");
+    CHECK_NRF_ERROR(err, "Failed to start advertising\n");
 
 err:
     return err;
@@ -101,16 +124,16 @@ uint32_t ble_stack_setup(void)
 
     SOFTDEVICE_HANDLER_INIT(NRF_CLOCK_LFCLKSRC_XTAL_20_PPM, NULL);
     err = softdevice_sys_evt_handler_set(&sys_event_handler);
-    CHECK_BLE_ERROR(err, "Failed to set up SOC event handler");
+    CHECK_NRF_ERROR(err, "Failed to set up SOC event handler");
     err = softdevice_ble_evt_handler_set(&ble_event_handler);
-    CHECK_BLE_ERROR(err, "Failed to set up BLE event handler");
+    CHECK_NRF_ERROR(err, "Failed to set up BLE event handler");
 
     ble_enable_params_t ble_enable_params = {0};
     ble_enable_params.gatts_enable_params.attr_tab_size = BLE_GATTS_ATTR_TAB_SIZE_DEFAULT;
     ble_enable_params.gatts_enable_params.service_changed = 0;
 
     err = sd_ble_enable(&ble_enable_params);
-    CHECK_BLE_ERROR(err, "Failed to enable BLE stack");
+    CHECK_NRF_ERROR(err, "Failed to enable BLE stack");
 
     ble_gap_setup();
     ble_dis_init_t dis_init = {0};
@@ -132,7 +155,8 @@ uint32_t ble_stack_setup(void)
     BLE_GAP_CONN_SEC_MODE_SET_NO_ACCESS(&dis_init.dis_attr_md.write_perm);
 
     err = ble_dis_init(&dis_init);
-    CHECK_BLE_ERROR(err, "Failed to init DIS\n");
+    CHECK_NRF_ERROR(err, "Failed to init DIS\n");
+
     ble_start_advertising();
 
 err:
