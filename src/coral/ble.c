@@ -17,6 +17,16 @@
         } \
     } while (0); \
 
+
+/* Contains the state of the ble service created for our rx/tx characteristics */
+ble_service_t ble_coral_ipc;
+
+uint8_t coral_ipc_rx_buf[256];
+uint8_t coral_ipc_tx_buf[256];
+
+uint8_t *coral_ipc_rx_desc = (uint8_t *)"ipc_rx";
+uint8_t *coral_ipc_tx_desc = (uint8_t *)"ipc_tx";
+
 char *nrf_err_tbl[] = {
     "NRF_SUCCESS",
     "NRF_ERROR_SVC_HANDLER_MISSING",
@@ -85,7 +95,6 @@ uint32_t ble_gap_setup(void)
             gap_addr.addr[3], gap_addr.addr[2], gap_addr.addr[1], gap_addr.addr[0]);
 
 err:
-
     return err;
 }
 
@@ -118,6 +127,123 @@ err:
     return err;
 }
 
+uint32_t create_coral_ipc_rx_char(void)
+{
+    uint32_t err = NRF_SUCCESS;
+    ble_uuid_t char_uuid;
+    ble_uuid128_t base_uuid = BLE_CORAL_BASE_UUID;
+    ble_gatts_char_md_t char_md = {0};
+    ble_gatts_attr_md_t attr_md = {0};
+    ble_gatts_attr_t attr_char = {0};
+
+    char_uuid.uuid = BLE_CORAL_IPC_RX_CHAR;
+    err = sd_ble_uuid_vs_add(&base_uuid, &char_uuid.type);
+    CHECK_NRF_ERROR(err, "Couldn't add rx char uuid to softdevice table\n");
+
+    // Store the attributes in our userspace buffer
+    attr_md.vloc = BLE_GATTS_VLOC_USER;
+
+    // Set up the characteristic values
+    attr_char.p_uuid = &char_uuid;
+    attr_char.p_attr_md = &attr_md;
+    attr_char.max_len = sizeof(coral_ipc_rx_buf);
+    attr_char.init_len = 0;
+    attr_char.p_value = coral_ipc_rx_buf;
+
+    char_md.char_props.read = 1;
+    char_md.p_char_user_desc = coral_ipc_rx_desc;
+    char_md.char_user_desc_size = strlen((char *)coral_ipc_rx_desc);
+    char_md.char_user_desc_max_size = strlen((char *)coral_ipc_rx_desc);
+    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&attr_md.read_perm);
+
+    err = sd_ble_gatts_characteristic_add(ble_coral_ipc.service_handle, &char_md,
+            &attr_char, &ble_coral_ipc.char_handles);
+    CHECK_NRF_ERROR(err, "Couldn't add coral rx characteristic\n");
+
+err:
+    return err;
+}
+
+uint32_t create_coral_ipc_tx_char(void)
+{
+    uint32_t err = NRF_SUCCESS;
+    ble_uuid_t char_uuid;
+    ble_uuid128_t base_uuid = BLE_CORAL_BASE_UUID;
+    ble_gatts_char_md_t char_md = {0};
+    ble_gatts_attr_md_t attr_md = {0};
+    ble_gatts_attr_t attr_char = {0};
+
+    char_uuid.uuid = BLE_CORAL_IPC_TX_CHAR;
+    err = sd_ble_uuid_vs_add(&base_uuid, &char_uuid.type);
+    CHECK_NRF_ERROR(err, "Couldn't add tx char uuid to softdevice table\n");
+
+    // Store the attributes in our userspace buffer
+    attr_md.vloc = BLE_GATTS_VLOC_USER;
+
+    // Set up the characteristic values
+    attr_char.p_uuid = &char_uuid;
+    attr_char.p_attr_md = &attr_md;
+    attr_char.max_len = sizeof(coral_ipc_tx_buf);
+    attr_char.init_len = 0;
+    attr_char.p_value = coral_ipc_tx_buf;
+
+    char_md.char_props.write = 1;
+    char_md.p_char_user_desc = coral_ipc_tx_desc;
+    char_md.char_user_desc_size = strlen((char *)coral_ipc_tx_desc);
+    char_md.char_user_desc_max_size = strlen((char *)coral_ipc_tx_desc);
+    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&attr_md.write_perm);
+
+    err = sd_ble_gatts_characteristic_add(ble_coral_ipc.service_handle, &char_md,
+            &attr_char, &ble_coral_ipc.char_handles);
+    CHECK_NRF_ERROR(err, "Couldn't add coral tx characteristic\n");
+
+err:
+    return err;
+}
+
+uint32_t ble_create_gatt_services(void)
+{
+    uint32_t err = NRF_SUCCESS;
+    ble_uuid_t service_uuid;
+    ble_uuid128_t base_uuid = BLE_CORAL_BASE_UUID;
+
+    // Add the base uuid for the coral ipc ble service to the softdevice's table and
+    // get an index back to it in coral_ipc_srvc.uuid_type
+    err = sd_ble_uuid_vs_add(&base_uuid, &service_uuid.type);
+    CHECK_NRF_ERROR(err, "Couldn't add serial service UUID to softdevice table\n");
+
+    // Using the uuid_type we got back, add the uuid for the service itself, referring back
+    // to the uuid type we were given before.
+    service_uuid.uuid = BLE_CORAL_IPC_UUID;
+    err = sd_ble_gatts_service_add(BLE_GATTS_SRVC_TYPE_PRIMARY,
+            &service_uuid, &ble_coral_ipc.service_handle);
+    CHECK_NRF_ERROR(err, "Couldn't create coral ipc service profile\n");
+
+    err = create_coral_ipc_rx_char();
+    CHECK_NRF_ERROR(err, "Couldn't create coral ipc rx characteristic\n");
+
+    err = create_coral_ipc_tx_char();
+    CHECK_NRF_ERROR(err, "Couldn't create coral ipc tx characteristic\n");
+
+    /* Nordic Device Information Service */
+    ble_dis_init_t dis_init = {0};
+    ble_srv_ascii_to_utf8(&dis_init.manufact_name_str, "Google");
+    ble_srv_ascii_to_utf8(&dis_init.model_num_str, "coral");
+    ble_srv_ascii_to_utf8(&dis_init.serial_num_str, "13579");
+    ble_srv_ascii_to_utf8(&dis_init.hw_rev_str, "1.0");
+    ble_srv_ascii_to_utf8(&dis_init.fw_rev_str, "1.1");
+    ble_srv_ascii_to_utf8(&dis_init.sw_rev_str, "1.2");
+    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&dis_init.dis_attr_md.read_perm);
+    BLE_GAP_CONN_SEC_MODE_SET_NO_ACCESS(&dis_init.dis_attr_md.write_perm);
+
+    err = ble_dis_init(&dis_init);
+    CHECK_NRF_ERROR(err, "Failed to init Device Information Service\n");
+
+
+err:
+    return err;
+}
+
 uint32_t ble_stack_setup(void)
 {
     uint32_t err = NRF_SUCCESS;
@@ -135,27 +261,11 @@ uint32_t ble_stack_setup(void)
     err = sd_ble_enable(&ble_enable_params);
     CHECK_NRF_ERROR(err, "Failed to enable BLE stack");
 
-    ble_gap_setup();
-    ble_dis_init_t dis_init = {0};
+    err = ble_gap_setup();
+    CHECK_NRF_ERROR(err, "Failed  to initialize GAP\n");
 
-#define ASSIGN_NRF_BLE_STR(x, s) x.p_str = (uint8_t *)s; x.length = strlen(s);
-    char *dis_name = "GoogleFNLK!";
-    char *dis_model = "123";
-    char *dis_serial = "987654";
-    char *dis_hwrev = "1.0";
-    char *dis_fwrev = "1.1";
-    char *dis_swrev = "1.2";
-    ASSIGN_NRF_BLE_STR(dis_init.manufact_name_str, dis_name);
-    ASSIGN_NRF_BLE_STR(dis_init.model_num_str, dis_model);
-    ASSIGN_NRF_BLE_STR(dis_init.serial_num_str, dis_serial);
-    ASSIGN_NRF_BLE_STR(dis_init.hw_rev_str, dis_hwrev);
-    ASSIGN_NRF_BLE_STR(dis_init.fw_rev_str, dis_fwrev);
-    ASSIGN_NRF_BLE_STR(dis_init.sw_rev_str, dis_swrev);
-    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&dis_init.dis_attr_md.read_perm);
-    BLE_GAP_CONN_SEC_MODE_SET_NO_ACCESS(&dis_init.dis_attr_md.write_perm);
-
-    err = ble_dis_init(&dis_init);
-    CHECK_NRF_ERROR(err, "Failed to init DIS\n");
+    err = ble_create_gatt_services();
+    CHECK_NRF_ERROR(err, "Failed to add initialize GATTS\n");
 
     ble_start_advertising();
 
