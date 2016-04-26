@@ -101,7 +101,12 @@ err:
 uint32_t ble_start_advertising(void)
 {
     uint32_t err = NRF_SUCCESS;
+    ble_uuid_t adv_uuids[] = {
+        { BLE_UUID_DEVICE_INFORMATION_SERVICE, BLE_UUID_TYPE_BLE },
+        { BLE_CORAL_IPC_UUID, BLE_UUID_TYPE_VENDOR_BEGIN }
+    };
     ble_advdata_t advertising_data = {0};
+    ble_advdata_t sr_data = {0};
     ble_advdata_manuf_data_t manuf_data = {0};
     ble_gap_adv_params_t advertising_params = {0};
 
@@ -111,7 +116,10 @@ uint32_t ble_start_advertising(void)
     advertising_data.flags                 = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
     advertising_data.p_manuf_specific_data = &manuf_data;
 
-    err = ble_advdata_set(&advertising_data, NULL);
+    sr_data.uuids_complete.uuid_cnt = COUNT_OF(adv_uuids);
+    sr_data.uuids_complete.p_uuids = adv_uuids;
+
+    err = ble_advdata_set(&advertising_data, &sr_data);
     CHECK_NRF_ERROR(err, "Failed to set advertising data");
 
     advertising_params.type         = BLE_GAP_ADV_TYPE_ADV_IND; // Indirect advertising, connectable
